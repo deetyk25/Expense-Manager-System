@@ -1,1 +1,18 @@
-// To add
+# Nodes
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# React
+client/build/
+client/node_modules/
+
+# Express
+server/node_modules/
+
+# Environment
+*.env
+
+# VSCode
+.DS_Store
+.vscode/
