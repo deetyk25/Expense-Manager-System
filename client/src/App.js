@@ -3,6 +3,7 @@ import { getExpenses, addExpense, deleteExpense } from "./services/expenses";
 
 function App() {
   const [expenses, setExpenses] = useState([]);
+  const [item, setItem] = useState("");
   const [category, setCategory] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
@@ -24,9 +25,10 @@ function App() {
   // Add new expense
   const handleAddExpense = async (e) => {
     e.preventDefault();
-    if (!category || !amount || !date) return;
+    if (!item || !category || !amount || !date) return;
     try {
-      await addExpense({ category, amount: parseFloat(amount), date });
+      await addExpense({ item, category, amount: parseFloat(amount), date });
+      setItem("");
       setCategory("");
       setAmount("");
       setDate("");
@@ -47,11 +49,17 @@ function App() {
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "30px" }}>
-      <h1>Personal Finance Tracker</h1>
+    <div style={{ textAlign: "left", marginTop: "30px" }}>
+      <h1>Expense Manager System</h1>
 
       {/* Add Expense Form */}
       <form onSubmit={handleAddExpense} style={{ marginBottom: "20px" }}>
+        <input
+          type="text"
+          placeholder="Item"
+          value={item}
+          onChange={(e) => setItem(e.target.value)}
+        />
         <input
           type="text"
           placeholder="Category"
@@ -71,12 +79,12 @@ function App() {
         />
         <button type="submit">Add Expense</button>
       </form>
-
       {/* Expense List */}
       <ul style={{ listStyle: "none", padding: 0 }}>
         {expenses.map((exp) => (
           <li key={exp.id} style={{ margin: "10px 0" }}>
-            {exp.date} - {exp.category} - ${exp.amount.toFixed(2)}
+            {exp.date} - <strong>{exp.item}</strong> ({exp.category}) - $
+            {exp.amount.toFixed(2)}
             <button
               style={{ marginLeft: "10px" }}
               onClick={() => handleDelete(exp.id)}

@@ -6,8 +6,8 @@ app.use(cors());
 app.use(express.json());
 
 let expenses = [
-  { id: 1, category: "School", amount: 12, date: "2025-08-12" },
-  { id: 2, category: "Food", amount: 3, date: "2025-08-16" }
+  { id: 1, item: "Notebook", category: "School", amount: 12, date: "2025-08-12" },
+  { id: 2, item: "Dinner", category: "Food", amount: 3, date: "2025-08-16" }
 ];
 
 app.get("/", (req, res) => {
@@ -19,9 +19,13 @@ app.get("/expenses", (req, res) => {
 });
 
 app.post("/expenses", (req, res) => {
-  const { category, amount, date } = req.body;
+  const { item, category, amount, date } = req.body;
+  if (!item || !category || !amount || !date) {
+    return res.status(400).json({ error: "Missing fields" });
+  }
   const newExpense = {
     id: expenses.length + 1,
+    item,
     category,
     amount,
     date
@@ -32,10 +36,11 @@ app.post("/expenses", (req, res) => {
 
 app.put("/expenses/:id", (req, res) => {
   const { id } = req.params;
-  const { category, amount, date } = req.body;
+  const { item, category, amount, date } = req.body;
   const expense = expenses.find(exp => exp.id == id);
   if (!expense) return res.status(404).json({ message: "Expense not found" });
 
+  expense.item = item ?? expense.item;
   expense.category = category ?? expense.category;
   expense.amount = amount ?? expense.amount;
   expense.date = date ?? expense.date;
