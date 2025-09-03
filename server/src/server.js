@@ -1,63 +1,90 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
+import mongoose from "mongoose";
 
+
+// MongoDB connection
+const uri = process.env.MONGO_URI;
+mongoose.connect(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("MongoDB connected!"))
+.catch((err) => console.error("MongoDB connection error:", err));
+
+// Create Express app
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-let expenses = [
-  { id: 1, item: "Notebook", category: "School", amount: 12, date: "2025-08-12" },
-  { id: 2, item: "Dinner", category: "Food", amount: 3, date: "2025-08-16" }
-];
+// Expense schema and model
+const expenseSchema = new mongoose.Schema({
+  item: { type: String, required: true },
+  category: { type: String, required: true },
+  amount: { type: Number, required: true },
+  date: { type: String, required: true },
+});
 
+const Expense = mongoose.model("Expense", expenseSchema);
+
+// Routes
 app.get("/", (req, res) => {
   res.json({ message: "Hello from Express backend!" });
 });
 
-app.get("/expenses", (req, res) => {
-  res.json(expenses);
+// Get all expenses
+app.get("/expenses", async (req, res) => {
+  try {
+    const expenses = await Expense.find();
+    res.json(expenses);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.post("/expenses", (req, res) => {
+// Add a new expense
+app.post("/expenses", async (req, res) => {
   const { item, category, amount, date } = req.body;
   if (!item || !category || !amount || !date) {
     return res.status(400).json({ error: "Missing fields" });
   }
-  const newExpense = {
-    id: expenses.length + 1,
-    item,
-    category,
-    amount,
-    date
-  };
-  expenses.push(newExpense);
-  res.status(201).json(newExpense);
+  try {
+    const newExpense = new Expense({ item, category, amount, date });
+    await newExpense.save();
+    res.status(201).json(newExpense);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
-app.put("/expenses/:id", (req, res) => {
+// Update an expense
+app.put("/expenses/:id", async (req, res) => {
   const { id } = req.params;
-  const { item, category, amount, date } = req.body;
-  const expense = expenses.find(exp => exp.id == id);
-  if (!expense) return res.status(404).json({ message: "Expense not found" });
-
-  expense.item = item ?? expense.item;
-  expense.category = category ?? expense.category;
-  expense.amount = amount ?? expense.amount;
-  expense.date = date ?? expense.date;
-
-  res.json(expense);
+  try {
+    const updatedExpense = await Expense.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updatedExpense) return res.status(404).json({ message: "Expense not found" });
+    res.json(updatedExpense);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
-app.delete("/expenses/:id", (req, res) => {
+// Delete an expense
+app.delete("/expenses/:id", async (req, res) => {
   const { id } = req.params;
-  const index = expenses.findIndex(exp => exp.id == id);
-  if (index === -1) return res.status(404).json({ message: "Expense not found" });
-
-  const deleted = expenses.splice(index, 1);
-  res.json(deleted[0]);
+  try {
+    const deletedExpense = await Expense.findByIdAndDelete(id);
+    if (!deletedExpense) return res.status(404).json({ message: "Expense not found" });
+    res.json(deletedExpense);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
-
+// Start server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 

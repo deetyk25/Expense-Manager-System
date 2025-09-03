@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:4000", // backend
+  baseURL: process.env.REACT_APP_URI, // backend
   // previously had proxy in json
 });
 

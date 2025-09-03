@@ -42,9 +42,9 @@ function App() {
   };
 
   // Delete expense
-  const handleDelete = async (id) => {
+  const handleDelete = async (_id) => {
     try {
-      await deleteExpense(id);
+      await deleteExpense(_id);
       fetchExpenses();
     } catch (error) {
       console.error("Error deleting expense:", error);
@@ -52,13 +52,13 @@ function App() {
   };
 
   const handleEdit = (expense) => {
-    setEditingId(expense.id);
+    setEditingId(expense._id);
     setEditFields({ ...expense });
   };
 
-  const handleSave = async (id) => {
+  const handleSave = async (_id) => {
     try {
-      await updateExpense(id, {
+      await updateExpense(_id, {
         ...editFields,
         amount: parseFloat(editFields.amount) 
       });
@@ -104,8 +104,8 @@ return (
       {/* Expense List */}
       <ul style={{ listStyle: "none", padding: 0 }}>
         {expenses.map((exp) => (
-          <li key={exp.id} style={{ margin: "10px 0" }}>
-            {editingId === exp.id ? (
+          <li key={exp._id} style={{ margin: "10px 0" }}>
+            {editingId === exp._id ? (
               <>
                 <input
                   type="text"
@@ -135,7 +135,7 @@ return (
                     setEditFields({ ...editFields, date: e.target.value })
                   }
                 />
-                <button onClick={() => handleSave(exp.id)}>Save</button>
+                <button onClick={() => handleSave(exp._id)}>Save</button>
                 <button onClick={() => setEditingId(null)}>Cancel</button>
               </>
             ) : (
@@ -144,7 +144,7 @@ return (
                 <button style={{ marginLeft: "10px" }} onClick={() => handleEdit(exp)}>
                   Edit
                 </button>
-                <button style={{ marginLeft: "10px" }} onClick={() => handleDelete(exp.id)}>
+                <button style={{ marginLeft: "10px" }} onClick={() => handleDelete(exp._id)}>
                   Delete
                 </button>
               </>
