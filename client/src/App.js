@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getExpenses, addExpense, deleteExpense } from "./services/expenses";
+import { getExpenses, addExpense, updateExpense, deleteExpense } from "./services/expenses";
 
 function App() {
   const [expenses, setExpenses] = useState([]);
@@ -7,6 +7,9 @@ function App() {
   const [category, setCategory] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
+
+  const [editingId, setEditingId] = useState(null);
+  const [editFields, setEditFields] = useState({ item: "", category: "", amount: "", date: "" });
 
   // Fetch all expenses
   useEffect(() => {
@@ -48,9 +51,27 @@ function App() {
     }
   };
 
-  return (
-    <div style={{ textAlign: "left", marginTop: "30px" }}>
-      <h1>Expense Manager System</h1>
+  const handleEdit = (expense) => {
+    setEditingId(expense.id);
+    setEditFields({ ...expense });
+  };
+
+  const handleSave = async (id) => {
+    try {
+      await updateExpense(id, {
+        ...editFields,
+        amount: parseFloat(editFields.amount) 
+      });
+      setEditingId(null);
+      fetchExpenses();
+    } catch (error) {
+      console.error("Error updating expense:", error);
+    }
+  };
+
+return (
+    <div style={{ textAlign: "left", marginLeft: "20px", marginTop: "30px" }}>
+      <h1>Personal Finance Tracker</h1>
 
       {/* Add Expense Form */}
       <form onSubmit={handleAddExpense} style={{ marginBottom: "20px" }}>
@@ -79,18 +100,55 @@ function App() {
         />
         <button type="submit">Add Expense</button>
       </form>
+
       {/* Expense List */}
       <ul style={{ listStyle: "none", padding: 0 }}>
         {expenses.map((exp) => (
           <li key={exp.id} style={{ margin: "10px 0" }}>
-            {exp.date} - <strong>{exp.item}</strong> ({exp.category}) - $
-            {exp.amount.toFixed(2)}
-            <button
-              style={{ marginLeft: "10px" }}
-              onClick={() => handleDelete(exp.id)}
-            >
-              Delete
-            </button>
+            {editingId === exp.id ? (
+              <>
+                <input
+                  type="text"
+                  value={editFields.item}
+                  onChange={(e) =>
+                    setEditFields({ ...editFields, item: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  value={editFields.category}
+                  onChange={(e) =>
+                    setEditFields({ ...editFields, category: e.target.value })
+                  }
+                />
+                <input
+                  type="number"
+                  value={editFields.amount}
+                  onChange={(e) =>
+                    setEditFields({ ...editFields, amount: e.target.value })
+                  }
+                />
+                <input
+                  type="date"
+                  value={editFields.date}
+                  onChange={(e) =>
+                    setEditFields({ ...editFields, date: e.target.value })
+                  }
+                />
+                <button onClick={() => handleSave(exp.id)}>Save</button>
+                <button onClick={() => setEditingId(null)}>Cancel</button>
+              </>
+            ) : (
+              <>
+                {exp.date} - {exp.item} ({exp.category}) - ${Number(exp.amount).toFixed(2)}
+                <button style={{ marginLeft: "10px" }} onClick={() => handleEdit(exp)}>
+                  Edit
+                </button>
+                <button style={{ marginLeft: "10px" }} onClick={() => handleDelete(exp.id)}>
+                  Delete
+                </button>
+              </>
+            )}
           </li>
         ))}
       </ul>
