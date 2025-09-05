@@ -134,7 +134,7 @@ function App() {
               </>
             ) : (
               <>
-                {exp.date} - {exp.item} ({exp.category}) - ${Number(exp.amount).toFixed(2)}
+                {exp.date} - {exp.item} [{exp.category}] - ${Number(exp.amount).toFixed(2)}
                 <button style={{ marginLeft: "10px" }} onClick={() => handleEdit(exp)}>Edit</button>
                 <button style={{ marginLeft: "10px" }} onClick={() => handleDelete(exp._id)}>Delete</button>
               </>
