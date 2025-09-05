@@ -45,6 +45,24 @@ app.get("/expenses", async (req, res) => {
   }
 });
 
+// Get expenses grouped by category
+app.get("/expenses/by-category", async (req, res) => {
+  try {
+    const result = await Expense.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          totalAmount: { $sum: "$amount" },
+        },
+      },
+      { $sort: { totalAmount: -1 } }, // descending order
+    ]);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Add a new expense
 app.post("/expenses", async (req, res) => {
   const { item, category, amount, date } = req.body;
