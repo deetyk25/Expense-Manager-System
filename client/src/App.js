@@ -25,6 +25,25 @@ function App() {
     }
   };
 
+  // Sort expenses
+  const sortExpenses = (criteria) => {
+    let sorted = [...expenses];
+
+    if (criteria === "date-desc") {
+      sorted.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } else if (criteria === "date-asc") {
+      sorted.sort((a, b) => new Date(a.date) - new Date(b.date));
+    } else if (criteria === "amount-asc") {
+      sorted.sort((a, b) => a.amount - b.amount);
+    } else if (criteria === "amount-desc") {
+      sorted.sort((a, b) => b.amount - a.amount);
+    } else if (criteria === "category") {
+      sorted.sort((a, b) => a.category.localeCompare(b.category));
+    }
+
+    setExpenses(sorted);
+  };
+
   // Add new expense
   const handleAddExpense = async (e) => {
     e.preventDefault();
@@ -71,7 +90,7 @@ function App() {
 
 return (
     <div style={{ textAlign: "left", marginLeft: "20px", marginTop: "30px" }}>
-      <h1>Personal Finance Tracker</h1>
+      <h1>Expense Manager System</h1>
 
       {/* Add Expense Form */}
       <form onSubmit={handleAddExpense} style={{ marginBottom: "20px" }}>
@@ -100,6 +119,18 @@ return (
         />
         <button type="submit">Add Expense</button>
       </form>
+
+      {/* Sorting Dropdown */}
+      <div style={{ marginBottom: "20px" }}>
+        <label style={{ marginRight: "10px" }}>Sort by:</label>
+        <select onChange={(e) => sortExpenses(e.target.value)}>
+          <option value="category">Category (Alphabetical Order)</option>
+          <option value="date-desc">Date (Newest First)</option>
+          <option value="date-asc">Date (Oldest First)</option>
+          <option value="amount-asc">Amount (Low → High)</option>
+          <option value="amount-desc">Amount (High → Low)</option>
+        </select>
+      </div>
 
       {/* Expense List */}
       <ul style={{ listStyle: "none", padding: 0 }}>
